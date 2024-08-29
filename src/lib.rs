@@ -1,8 +1,9 @@
+use std::collections::HashMap;
 use base64::prelude::*;
 
 pub fn hex_to_base64(hex_string: &str) -> String {
     let bytes = hex::decode(hex_string).unwrap();
-    return BASE64_STANDARD.encode(bytes);
+    BASE64_STANDARD.encode(bytes)
 }
 
 pub fn xor(hex_string1: &str, hex_string2: &str) -> String {
@@ -14,6 +15,40 @@ pub fn xor(hex_string1: &str, hex_string2: &str) -> String {
             .map(|(x, y)| x ^ y)
             .collect::<Vec<u8>>(),
     )
+}
+
+fn score_string(hex_string: &str) {
+    let ranking: HashMap<char, i32> = HashMap::from([
+        ('e', 13),
+        ('t', 12),
+        ('a', 11),
+        ('o', 10),
+        ('i', 9),
+        ('n', 8),
+        (' ', 7),
+        ('s', 6),
+        ('h', 5),
+        ('r', 4),
+        ('d', 3),
+        ('l', 2),
+        ('u', 1),
+    ]);
+}
+
+fn xor_cipher(hex_string: &str) {
+    let bytes = hex::decode(hex_string).unwrap();
+    // let mut scores = HashMap::new();
+    for byte in 0u8..=255 {
+        let decrypted = bytes.iter().map(|x| x ^ byte).collect::<Vec<u8>>();
+
+        match String::from_utf8(decrypted) {
+            Ok(decrypted_string) => {
+
+                println!("{}: {}", byte, decrypted_string)
+            },
+            Err(e) => println!("{}: Failed to convert decrypted data to string: {}", byte, e),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -34,5 +69,10 @@ mod tests {
             ),
             "746865206b696420646f6e277420706c6179"
         )
+    }
+
+    #[test]
+    fn set1ch3() {
+        xor_cipher("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736");
     }
 }
