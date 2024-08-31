@@ -17,7 +17,7 @@ pub fn xor(hex_string1: &str, hex_string2: &str) -> String {
     )
 }
 
-fn score_string(hex_string: &str) {
+fn score_string(hex_string: &str) -> i32 {
     let ranking: HashMap<char, i32> = HashMap::from([
         ('e', 13),
         ('t', 12),
@@ -33,22 +33,32 @@ fn score_string(hex_string: &str) {
         ('l', 2),
         ('u', 1),
     ]);
+    hex_string.chars().map(|c| {
+        match ranking.get(&c.to_ascii_lowercase()) {
+            Some(&value) => value,
+            None => 0
+        }
+    }).collect::<Vec<i32>>().iter().sum()
 }
 
-fn xor_cipher(hex_string: &str) {
+fn xor_cipher(hex_string: &str) -> (i32, u8, String){
     let bytes = hex::decode(hex_string).unwrap();
-    // let mut scores = HashMap::new();
+    let mut out = (0, 0u8, String::new());
     for byte in 0u8..=255 {
         let decrypted = bytes.iter().map(|x| x ^ byte).collect::<Vec<u8>>();
-
         match String::from_utf8(decrypted) {
             Ok(decrypted_string) => {
-
-                println!("{}: {}", byte, decrypted_string)
+                let score = score_string(&decrypted_string);
+                if score > out.0 {
+                    out = (score, byte, decrypted_string.to_string());
+                }
+                // println!("{}, {}: {}", byte, score_string(&decrypted_string),decrypted_string)
             },
-            Err(e) => println!("{}: Failed to convert decrypted data to string: {}", byte, e),
+            // If we could not decrypt, don't care
+            Err(_) => {}
         }
     }
+    out
 }
 
 #[cfg(test)]
@@ -73,6 +83,8 @@ mod tests {
 
     #[test]
     fn set1ch3() {
-        xor_cipher("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736");
+        let output = xor_cipher("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736");
+        assert_eq!(output.1, 88);
+        assert_eq!(output.2, "Cooking MC's like a pound of bacon")
     }
 }
