@@ -87,4 +87,19 @@ mod tests {
         assert_eq!(output.1, 88);
         assert_eq!(output.2, "Cooking MC's like a pound of bacon")
     }
+
+    #[test]
+    fn set1ch4() {
+        let data = include_str!("tests/4.txt");
+        let mut output: (i32, u8, String) = (0,0,String::new());
+
+        for line in data.lines() {
+            let decrypted = xor_cipher(line);
+            if decrypted.0 > output.0 {
+                output = decrypted.clone();
+            }
+            println!("{}",decrypted.2);
+        }
+        assert_eq!(output.2, "Now that the party is jumping\n");
+    }
 }
